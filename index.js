@@ -1,20 +1,18 @@
-const express = require('express')
+const express = require('express'), bodyParser = require('body-parser'), cors = require('cors')
 const app = express()
-const bodyParser = require('body-parser')
-const cors = require('cors')
 
+app.use((req, res, next) => {
+    res.removeHeader('X-Powered-By')
+    next()
+})
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors())
 
-const AllPosts = require('./services/AllPosts')
-const CreatePost = require('./services/CreatePost.js')
-const DeletePost = require('./services/DeletePost')
-const UpdatePost = require('./services/UpdatePost.js')
+const memeRoute = require('./routes/memeRoute')
+const userRoute = require('./routes/userRoute')
+app.use('/meme', memeRoute)
+app.use('/user', userRoute)
 
-app.get('/all', AllPosts)
-app.post('/create', CreatePost)
-app.delete('/delete', DeletePost)
-app.post('/update', UpdatePost)
 
 module.exports = app

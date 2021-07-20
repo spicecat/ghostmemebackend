@@ -1,33 +1,20 @@
-const express = require('express'), bodyParser = require('body-parser'), cors = require('cors')
+const express = require('express')
 const app = express()
+const bodyParser = require('body-parser')
+const cors = require('cors')
 
-app.use((req, res, next) => {
-    res.removeHeader('X-Powered-By')
-    next()
-})
-app.use(cors())
 app.use(bodyParser.json())
 app.use(bodyParser.urlencoded({ extended: true }))
+app.use(cors())
 
-const postRoute = require('./routes/postRoute')
-app.use('/post', postRoute)
+const AllPosts = require('./services/AllPosts')
+const CreatePost = require('./services/CreatePost.js')
+const DeletePost = require('./services/DeletePost')
+const UpdatePost = require('./services/UpdatePost.js')
 
+app.get('/all', AllPosts)
+app.post('/create', CreatePost)
+app.delete('/delete', DeletePost)
+app.post('/update', UpdatePost)
 
-const mongoose = require('mongoose'), dotenv = require('dotenv').config()
-const mongoUrl = process.env.CONNECTION_STRING
-
-mongoose.connect(mongoUrl, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-    autoIndex: true,
-    useCreateIndex: true
-}, err => {
-    if (err) console.log('error:', err)
-})
-const dbConnection = mongoose.connection
-dbConnection.on('error', err => console.error(err))
-dbConnection.once('open', () => console.log('Database connected!'))
-
-
-const port = 3030
-app.listen(port, console.log('port:', port))
+module.exports = app

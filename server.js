@@ -4,7 +4,6 @@ const app = require('./index')
 
 const mongoUrl = process.env.CONNECTION_STRING
 
-
 mongoose.connect(mongoUrl, {
     useNewUrlParser: true,
     useUnifiedTopology: true,

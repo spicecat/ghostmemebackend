@@ -11,8 +11,8 @@ app.use(cors())
 
 const memeRoute = require('./routes/memeRoute')
 const userRoute = require('./routes/userRoute')
-app.use('/meme', memeRoute)
-app.use('/user', userRoute)
+app.use('/memes', memeRoute)
+app.use('/users', userRoute)
 
 
 module.exports = app

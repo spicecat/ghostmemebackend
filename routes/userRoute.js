@@ -1,10 +1,8 @@
 const express = require('express'), bodyParser = require('body-parser')
-// const { addUser, deleteUser, getUsers } = require('../services/userServices')
+const { register, login } = require('../services/userServices')
 
 const userRouter = express.Router()
-// userRouter.route('/').get(getUsers)
-// userRouter.route('/').user(addUser)
-// userRouter.route('/').delete(deleteUser)
-// userRouter.route('/edit').user(deleteUser, addUser)
+userRouter.route('/').post(register)
+userRouter.route('/').get(login)
 
 module.exports = userRouter

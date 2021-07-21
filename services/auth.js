@@ -1,3 +1,4 @@
+const bycrypt = require('bcrypt')
 const jsonWebToken = require('jsonwebtoken')
 
 const getAuth = authHeaders => {
@@ -6,7 +7,6 @@ const getAuth = authHeaders => {
         return [s.slice(0, i), s.slice(i + 1)]
     }
     try {
-        console.log(authHeaders)
         const [authType, authContent] = splitOnce(authHeaders, ' ')
         if (authType === 'Basic') {
             const [username, password] = splitOnce(Buffer.from(authContent, 'base64').toString('ASCII'), ':')
@@ -16,7 +16,4 @@ const getAuth = authHeaders => {
     } catch (err) { return }
 }
 
-const authUser = (username, password) => {
-}
-
-module.exports = { getAuth, authUser }
+module.exports = { getAuth }

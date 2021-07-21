@@ -12,24 +12,19 @@ const register = async (req, res) => {
         await user.save()
         res.status(201).send('User registered')
     } catch (err) {
-        console.log(err, err.code)
         if (err.code === 11000) res.status(409).send('Username taken')
-        else res.status(401).send('Bad input')
+        else res.status(400).send('Bad input')
     }
 }
 
 const login = async (req, res) => {
     try {
-        const { password } = req.body
-        // if (await userModel.findOne({ username })) {
-        //     res.status(409).json('Username already taken')
-        //     return
-        // }
-        const hashedPassword = await bycrypt.hash(password, 10)
-        const user = new userModel({})
-        await user.save()
-        res.status(201).send('User registered')
-    } catch (err) { res.status(401).send('Bad input') }
+        const { username, password } = getAuth(req.headers.authorization)
+        const user = await userModel.findOne({ username })
+        if (user && await bycrypt.compare(password, user.password))
+            res.status(202).send('Login successful')
+        else res.status(401).send('Bad credentials')
+    } catch (err) { res.status(400).send('Bad input') }
 }
 
 module.exports = { register, login }

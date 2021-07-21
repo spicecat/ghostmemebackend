@@ -12,6 +12,7 @@ const register = async (req, res) => {
         await user.save()
         res.status(201).send('User registered')
     } catch (err) {
+        console.log(err, err.code)
         if (err.code === 11000) res.status(409).send('Username taken')
         else res.status(401).send('Bad input')
     }

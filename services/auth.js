@@ -1,6 +1,8 @@
 const bycrypt = require('bcrypt')
 const jsonWebToken = require('jsonwebtoken')
 
+const tokenSignature = process.env.TOKEN_SIGNATURE
+
 const getAuth = async (req, res, next) => {
     const splitOnce = (s, d) => {
         const i = s.indexOf(d)
@@ -12,29 +14,22 @@ const getAuth = async (req, res, next) => {
             const [username, password] = splitOnce(Buffer.from(authContent, 'base64').toString('ASCII'), ':')
             req.body = { ...req.body, username, password }
             next()
+        } else if (authType === 'Bearer') {
+            
+            next()
         }
         else res.status(400).send('Bad input')
     } catch (err) { res.status(400).send('Bad input') }
 }
 
-// const tokenAuth = async (req, res, next) => {
-//     const requestHeader = req.headers.authorization
-//     if (requestHeader === undefined || requestHeader === null) res.status(401).json({ error: "Unauthorized" })
-//     const [type, payload] = requestHeader.split(" ")
-//     if (type === "Bearer") {
-//         try {
-//             const verification = jsonWebToken.verify(payload, tokenSignature)
-//             console.log("Verification: ", verification)
-//             try {
-//                 const user = await findUser(verification.email)
-//                 req.email = verification.email
-//                 next()
-//             } catch (error) { res.status(400).json({ error: "Bad Credentials" }) }
-//             return
-//         } catch (error) { }
-//     }
-//     res.status(401).json({ error: "Unauthorized Token" })
-//     return
-// }
+const createToken = async (req, res, next) => {
+    req.body.token = jsonWebToken.sign({ username: req.body.username }, tokenSignature, { expiresIn: "2h" })
+    next()
+}
 
-module.exports = { getAuth }
+const verifyToken = async (req, res, next) => {
+    if (req.body.username === jsonWebToken.verify(req.body.token, tokenSignature).username) next()
+    else res.status(401).send('Bad token')
+}
+
+module.exports = { getAuth, createToken, verifyToken }

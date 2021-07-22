@@ -5,10 +5,8 @@ const { getAuth } = require('./auth')
 
 const register = async (req, res) => {
     try {
-        const { username, password } = getAuth(req.headers.authorization)
-        console.log(username, password, req.body)
-        const hashedPassword = await bycrypt.hash(password, 10)
-        const user = new userModel({ ...req.body, username, password: hashedPassword })
+        const hashedPassword = await bycrypt.hash(req.body.password, 10)
+        const user = new userModel({ ...req.body, password: hashedPassword })
         await user.save()
         res.status(201).send('User registered')
     } catch (err) {
@@ -19,7 +17,7 @@ const register = async (req, res) => {
 
 const login = async (req, res) => {
     try {
-        const { username, password } = getAuth(req.headers.authorization)
+        const { username, password } = req.body
         const user = await userModel.findOne({ username })
         if (user && await bycrypt.compare(password, user.password))
             res.status(202).send('Login successful')

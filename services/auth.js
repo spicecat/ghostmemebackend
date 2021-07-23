@@ -1,7 +1,7 @@
 const bycrypt = require('bcrypt')
 const jsonWebToken = require('jsonwebtoken')
 
-const tokenSignature = process.env.TOKEN_SIGNATURE
+const { tokenSignature } = require('../var')
 
 const getAuth = async (req, res, next) => {
     const splitOnce = (s, d) => {
@@ -15,7 +15,7 @@ const getAuth = async (req, res, next) => {
             req.body = { ...req.body, username, password }
             next()
         } else if (authType === 'Bearer') {
-            
+
             next()
         }
         else res.status(400).send('Bad input')

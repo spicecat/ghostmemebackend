@@ -16,7 +16,7 @@ const UserSchema = mongoose.Schema({
     friends: { type: Number, required: true, default: 0 },
     liked: { type: Number, required: true, default: 0 },
     deleted: { type: Boolean, required: true, default: false },
-    imageUrl: { type: String }
+    profile_picture: { type: String }
 })
 
 module.exports = mongoose.model('user', UserSchema)

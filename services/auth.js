@@ -1,7 +1,6 @@
-const bycrypt = require('bcrypt')
-const jsonWebToken = require('jsonwebtoken')
+const bycrypt = require('bcrypt'), jsonWebToken = require('jsonwebtoken')
 
-const { tokenSignature } = require('../var')
+const { tokenSignature } = require('./var')
 
 const getAuth = async (req, res, next) => {
     const splitOnce = (s, d) => {

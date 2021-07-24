@@ -29,35 +29,30 @@ const register = async (req, res, next) => {
     next()
 }
 
-const getUser = async username => {
+const getUser = async (req, res, next) => {
+    const { username } = req.body
     const url = baseUrl + '/' + username.split('/', 1)
     console.log(url)
     try {
         var response = await superagent.get(url).set('key', apiKey)
     } catch (err) {
-        if (err.status === 555) {
-            const retry = async () => new Promise(resolve => setTimeout(() => resolve(getUser(username)), 1500))
-            return await retry()
-        }
-        return {}
+        if (err.status === 555) setTimeout(async () => { await getUser(req, res, next) }, 1500)
+        res.sendStatus(401)
+        return
     }
     const { user } = response.body
     console.log(user)
-    return user
+    req.body.user = user
+    next()
 }
 
 const login = async (req, res, next) => {
-    try {
-        const { username, password } = req.body
-        const { user_id } = await getUser(username)
-        if (user_id) {
-            const user = await userModel.findOne({ user_id })
-            console.log(user)
-            if (user && await bycrypt.compare(password, user.password)) next()
-            else res.status(401).send({ error: 'Bad credentials' })
-        }
-        else res.status(401).send({ error: 'Bad credentials' })
-    } catch (err) { res.status(400).send({ error: 'Bad input' }) }
+    const { password } = req.body, { user_id } = req.body.user
+    const user = await userModel.findOne({ user_id })
+    req.body.user.imageBase64 = user.imageBase64
+    console.log(user)
+    if (user && await bycrypt.compare(password, user.password)) next()
+    else res.sendStatus(401)
 }
 
-module.exports = { register, login }
+module.exports = { register, getUser, login }

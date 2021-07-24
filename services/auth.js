@@ -2,28 +2,27 @@ const bycrypt = require('bcrypt'), jsonWebToken = require('jsonwebtoken')
 
 const { tokenSignature } = require('./var')
 
+
+const splitOnce = (s, d) => {
+    const i = s.indexOf(d)
+    return [s.slice(0, i), s.slice(i + 1)]
+}
+
 const getAuth = async (req, res, next) => {
-    const splitOnce = (s, d) => {
-        const i = s.indexOf(d)
-        return [s.slice(0, i), s.slice(i + 1)]
-    }
     try {
         const [authType, authContent] = splitOnce(req.headers.authorization, ' ')
+        console.log(req.body, authType, authContent)
         if (authType === 'Basic') {
             const [username, password] = splitOnce(Buffer.from(authContent, 'base64').toString('ASCII'), ':')
             req.body = { ...req.body, username, password }
             next()
-        } else if (authType === 'Bearer') {
-
-            next()
-        }
+        } else if (authType === 'Bearer') next()
         else res.status(400).send('Bad input')
     } catch (err) { res.status(400).send('Bad input') }
 }
 
-const createToken = async (req, res, next) => {
-    req.body.token = jsonWebToken.sign({ username: req.body.username }, tokenSignature, { expiresIn: "2h" })
-    next()
+const returnToken = async (req, res) => {
+    res.status(202).send({ token: jsonWebToken.sign({ username: req.body.username }, tokenSignature, { expiresIn: "2h" }) })
 }
 
 const verifyToken = async (req, res, next) => {
@@ -31,4 +30,4 @@ const verifyToken = async (req, res, next) => {
     else res.status(401).send('Bad token')
 }
 
-module.exports = { getAuth, createToken, verifyToken }
+module.exports = { getAuth, returnToken, verifyToken }

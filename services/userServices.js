@@ -40,7 +40,7 @@ const getUser = async (req, res, next) => {
         var response = await superagent.get(url).set('key', apiKey)
     } catch (err) {
         if (err.status === 555) setTimeout(async () => { await getUser(req, res, next) }, 1500)
-        res.sendStatus(401)
+        else res.sendStatus(401)
         return
     }
     const { user } = response.body
@@ -59,6 +59,7 @@ const getUser = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     const { password, userCreds } = req.body
+    console.log(userCreds.password) //remove
     if (userCreds && await bycrypt.compare(password, userCreds.password)) next()
     else res.sendStatus(401)
 }

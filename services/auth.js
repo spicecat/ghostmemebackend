@@ -1,4 +1,4 @@
-const bycrypt = require('bcrypt'), jsonWebToken = require('jsonwebtoken')
+const jsonWebToken = require('jsonwebtoken')
 
 const { tokenSignature } = require('./var')
 
@@ -23,10 +23,7 @@ const getAuth = async (req, res, next) => {
                 req.body.username = verification.username
                 console.log(verification)
                 next()
-            } catch (err) {
-                res.sendStatus(401)
-                return
-            }
+            } catch (err) { res.sendStatus(401) }
         }
         else res.sendStatus(401)
     } catch (err) { res.sendStatus(400) }

@@ -17,18 +17,25 @@ const getAuth = async (req, res, next) => {
             req.body.username = username
             req.body.password = password
             next()
-        } else if (authType === 'Bearer') next()
-        else res.sendStatus(400)
+        } else if (authType === 'Bearer') {
+            try {
+                const verification = verifyToken(authContent)
+                req.body.username = verification.username
+                console.log(verification)
+                next()
+            } catch (err) {
+                res.sendStatus(401)
+                return
+            }
+        }
+        else res.sendStatus(401)
     } catch (err) { res.sendStatus(400) }
 }
 
 const returnToken = async (req, res) => {
-    res.status(202).send({ user: req.body.user, token: jsonWebToken.sign({ username: req.body.username }, tokenSignature, { expiresIn: "2h" }) })
+    res.status(202).send({ token: jsonWebToken.sign({ username: req.body.username }, tokenSignature, { expiresIn: "2h" }) })
 }
 
-const verifyToken = async (req, res, next) => {
-    if (req.body.username === jsonWebToken.verify(req.body.token, tokenSignature).username) next()
-    else res.sendStatus(401)
-}
+const verifyToken = token => jsonWebToken.verify(token, tokenSignature)
 
 module.exports = { getAuth, returnToken, verifyToken }

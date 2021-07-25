@@ -22,8 +22,11 @@ const register = async (req, res, next) => {
         else res.status(400).send({ error: err.response.body.error })
         return
     }
-    const { user } = response.body
-    console.log(user)
+    // const { user } = response.body
+    // console.log(user)
+    // req.body.user = user
+    // req.body.user.imageBase64 = imageBase64
+
     const hashedPassword = await bycrypt.hash(password, 10)
     await new userModel({ user_id: user.user_id, password: hashedPassword, imageBase64 }).save()
     next()
@@ -42,17 +45,26 @@ const getUser = async (req, res, next) => {
     }
     const { user } = response.body
     console.log(user)
+    req.body.userCreds = {}
+
+    try {
+        const userCreds = await userModel.findOne({ user_id: user.user_id })
+        user.imageBase64 = userCreds.imageBase64
+        req.body.userCreds = userCreds
+    }
+    catch { }
     req.body.user = user
     next()
 }
 
 const login = async (req, res, next) => {
-    const { password } = req.body, { user_id } = req.body.user
-    const user = await userModel.findOne({ user_id })
-    req.body.user.imageBase64 = user.imageBase64
-    console.log(user)
-    if (user && await bycrypt.compare(password, user.password)) next()
+    const { password, userCreds } = req.body
+    if (userCreds && await bycrypt.compare(password, userCreds.password)) next()
     else res.sendStatus(401)
 }
 
-module.exports = { register, getUser, login }
+const returnUser = async (req, res) => {
+    res.status(202).send({ user: req.body.user })
+}
+
+module.exports = { register, getUser, login, returnUser }

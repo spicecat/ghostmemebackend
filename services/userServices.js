@@ -19,7 +19,13 @@ const register = async (req, res, next) => {
     try { var response = await superagent.post(url, nullifyUndefined({ name, email, phone, username, imageBase64: null })).set('key', apiKey) }
     catch (err) {
         if (err.status === 555) setTimeout(async () => { await register(req, res, next) }, 1500)
-        else res.status(400).send({ error: err.response.body.error })
+        else {
+            const error = err.response.body.error
+            if (error === 'a user with that email address already exists' ||
+                error === 'a user with that username already exists')
+                res.sendStatus(409)
+            else res.status(400).send({ error })
+        }
         return
     }
     const { user } = response.body

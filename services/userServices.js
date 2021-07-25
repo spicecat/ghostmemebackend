@@ -22,10 +22,8 @@ const register = async (req, res, next) => {
         else res.status(400).send({ error: err.response.body.error })
         return
     }
-    // const { user } = response.body
-    // console.log(user)
-    // req.body.user = user
-    // req.body.user.imageBase64 = imageBase64
+    const { user } = response.body
+    console.log(user)
 
     const hashedPassword = await bycrypt.hash(password, 10)
     await new userModel({ user_id: user.user_id, password: hashedPassword, imageBase64 }).save()
@@ -47,7 +45,7 @@ const getUser = async (req, res, next) => {
     console.log(user)
     req.body.userCreds = {}
 
-    try {
+    try { // add locally stored profile picture to user
         const userCreds = await userModel.findOne({ user_id: user.user_id })
         user.imageBase64 = userCreds.imageBase64
         req.body.userCreds = userCreds
@@ -59,7 +57,6 @@ const getUser = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     const { password, userCreds } = req.body
-    console.log(userCreds.password) //remove
     if (userCreds && await bycrypt.compare(password, userCreds.password)) next()
     else res.sendStatus(401)
 }

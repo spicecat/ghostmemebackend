@@ -30,7 +30,8 @@ const getAuth = async (req, res, next) => {
 }
 
 const returnToken = async (req, res) => {
-    res.status(202).send({ token: jsonWebToken.sign({ username: req.body.username }, tokenSignature, { expiresIn: "2h" }) })
+    console.log(req.query)
+    res.status(202).send({ token: jsonWebToken.sign({ username: req.body.username }, tokenSignature, req.query.rememberMe && { expiresIn: '2h' }) })
 }
 
 const verifyToken = token => jsonWebToken.verify(token, tokenSignature)

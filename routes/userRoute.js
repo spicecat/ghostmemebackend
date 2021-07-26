@@ -1,8 +1,10 @@
-const express = require('express'), bodyParser = require('body-parser')
-const { register, login } = require('../services/userServices')
+const express = require('express')
+const { getAuth, returnToken } = require('../services/auth')
+const { register, getUser, login, returnUser } = require('../services/userServices')
 
 const userRouter = express.Router()
-userRouter.route('/').post(register)
-userRouter.route('/').get(login)
+userRouter.route('/').post(getAuth, register, returnToken)
+userRouter.route('/').get(getAuth, getUser, login, returnToken)
+userRouter.route('/getUser').get(getAuth, getUser, returnUser)
 
 module.exports = userRouter

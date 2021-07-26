@@ -1,34 +1,74 @@
-const bycrypt = require('bcrypt')
+const superagent = require('superagent'), bycrypt = require('bcrypt')
 const userModel = require('../models/User')
-const { getAuth } = require('./auth')
 
+const { apiUrl, apiKey } = require('./var')
 
-const register = async (req, res) => {
-    try {
-        const { username, password } = getAuth(req.headers.authorization)
-        console.log(username, password, req.body)
-        const hashedPassword = await bycrypt.hash(password, 10)
-        const user = new userModel({ ...req.body, username, password: hashedPassword })
-        await user.save()
-        res.status(201).send('User registered')
-    } catch (err) {
-        if (err.code === 11000) res.status(409).send('Username taken')
-        else res.status(401).send('Bad input')
+const baseUrl = apiUrl + '/users'
+
+const nullifyUndefined = obj => Object.fromEntries(Object.entries(obj).map(v => [v[0], v[1] || null]))
+
+// const updateDatabase = async () => {
+//     const url = baseUrl
+//     const { users } = (await superagent.get(url).set('key', apiKey)).body
+//     console.log(users)
+// }
+
+const register = async (req, res, next) => {
+    const url = baseUrl
+    const { name, email, phone, username, imageBase64, password } = req.body
+    try { var response = await superagent.post(url, nullifyUndefined({ name, email, phone, username, imageBase64: null })).set('key', apiKey) }
+    catch (err) {
+        if (err.status === 555) setTimeout(async () => { await register(req, res, next) }, 1500)
+        else {
+            const error = err.response.body.error
+            if (error === 'a user with that email address already exists' ||
+                error === 'a user with that username already exists')
+                res.sendStatus(409)
+            else res.status(400).send({ error })
+        }
+        return
     }
+    const { user } = response.body
+    console.log(user)
+
+    const hashedPassword = await bycrypt.hash(password, 10)
+    await new userModel({ user_id: user.user_id, password: hashedPassword, imageBase64 }).save()
+    next()
 }
 
-const login = async (req, res) => {
+const getUser = async (req, res, next) => {
+    const { username } = req.body
+    const url = baseUrl + '/' + username.split('/', 1)
+    console.log(url)
     try {
-        const { password } = req.body
-        // if (await userModel.findOne({ username })) {
-        //     res.status(409).json('Username already taken')
-        //     return
-        // }
-        const hashedPassword = await bycrypt.hash(password, 10)
-        const user = new userModel({})
-        await user.save()
-        res.status(201).send('User registered')
-    } catch (err) { res.status(401).send('Bad input') }
+        var response = await superagent.get(url).set('key', apiKey)
+    } catch (err) {
+        if (err.status === 555) setTimeout(async () => { await getUser(req, res, next) }, 1500)
+        else res.sendStatus(401)
+        return
+    }
+    const { user } = response.body
+    console.log(user)
+    req.body.userCreds = {}
+
+    try { // add locally stored profile picture to user
+        const userCreds = await userModel.findOne({ user_id: user.user_id })
+        user.imageBase64 = userCreds.imageBase64
+        req.body.userCreds = userCreds
+    }
+    catch { }
+    req.body.user = user
+    next()
 }
 
-module.exports = { register, login }
+const login = async (req, res, next) => {
+    const { password, userCreds } = req.body
+    if (userCreds && await bycrypt.compare(password, userCreds.password)) next()
+    else res.sendStatus(401)
+}
+
+const returnUser = async (req, res) => {
+    res.status(202).send({ user: req.body.user })
+}
+
+module.exports = { register, getUser, login, returnUser }

@@ -44,6 +44,7 @@ const getUser = async (req, res, next) => {
         var response = await superagent.get(url).set('key', apiKey)
     } catch (err) {
         if (err.status === 555) setTimeout(async () => { await getUser(req, res, next) }, 1500)
+        else if (err.status === 429) res.sendStatus(400)
         else res.sendStatus(401)
         return
     }

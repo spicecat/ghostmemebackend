@@ -32,44 +32,55 @@ const register = async (req, res, next) => {
     console.log(user)
 
     const hashedPassword = await bycrypt.hash(password, 10)
-    await new userModel({ user_id: user.user_id, password: hashedPassword, imageBase64 }).save()
+    await new userModel({ user_id: user.user_id, username, email, password: hashedPassword, imageBase64 }).save()
     next()
 }
 
 const getUser = async (req, res, next) => {
     const { username } = req.body
-    const url = baseUrl + '/' + username.split('/', 1)
-    console.log(url)
-    try {
-        var response = await superagent.get(url).set('key', apiKey)
-    } catch (err) {
-        if (err.status === 555) setTimeout(async () => { await getUser(req, res, next) }, 1500)
-        else if (err.status === 429) res.sendStatus(400)
-        else res.sendStatus(401)
+    const user = await userModel.findOne({
+        $or: [
+            { username },
+            { email: username }
+        ]
+    })
+    if (user) req.body.user = user
+    else {
+        res.sendStatus(401)
         return
     }
-    const { user } = response.body
-    console.log(user)
-    req.body.userCreds = {}
+    // const url = baseUrl + '/' + username.split('/', 1)
+    // console.log(url)
+    // try {
+    //     var response = await superagent.get(url).set('key', apiKey)
+    // } catch (err) {
+    //     if (err.status === 555) setTimeout(async () => { await getUser(req, res, next) }, 1500)
+    //     else if (err.status === 429) res.sendStatus(400)
+    //     else res.sendStatus(401)
+    //     return
+    // }
+    // const { user } = response.body
+    // console.log(user)
+    // req.body.userCreds = {}
 
-    try { // add locally stored profile picture to user
-        const userCreds = await userModel.findOne({ user_id: user.user_id })
-        user.imageBase64 = userCreds.imageBase64
-        req.body.userCreds = userCreds
-    }
-    catch { }
-    req.body.user = user
+    // try { // add locally stored profile picture to user
+    //     const userCreds = await userModel.findOne({ user_id: user.user_id })
+    //     user.imageBase64 = userCreds.imageBase64
+    //     req.body.userCreds = userCreds
+    // }
+    // catch { }
+    // req.body.user = user
     next()
 }
 
 const login = async (req, res, next) => {
-    const { password, userCreds } = req.body
-    if (userCreds && await bycrypt.compare(password, userCreds.password)) next()
+    const { password, user } = req.body
+    if (user && await bycrypt.compare(password, user.password)) next()
     else res.sendStatus(401)
 }
 
 const returnUser = async (req, res) => {
-    res.status(202).send({ user: req.body.user })
+    res.status(202).send({ user_id: req.body.user.user_id })
 }
 
 module.exports = { register, getUser, login, returnUser }

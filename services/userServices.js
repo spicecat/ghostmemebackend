@@ -5,7 +5,7 @@ const { apiUrl, apiKey } = require('./var')
 
 const baseUrl = apiUrl + '/users'
 
-const nullifyUndefined = obj => Object.fromEntries(Object.entries(obj).map(v => [v[0], v[1] || null]))
+const nullifyUndefined = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, v || null]))
 
 // const updateDatabase = async () => {
 //     const url = baseUrl
@@ -49,27 +49,6 @@ const getUser = async (req, res, next) => {
         res.sendStatus(401)
         return
     }
-    // const url = baseUrl + '/' + username.split('/', 1)
-    // console.log(url)
-    // try {
-    //     var response = await superagent.get(url).set('key', apiKey)
-    // } catch (err) {
-    //     if (err.status === 555) setTimeout(async () => { await getUser(req, res, next) }, 1500)
-    //     else if (err.status === 429) res.sendStatus(400)
-    //     else res.sendStatus(401)
-    //     return
-    // }
-    // const { user } = response.body
-    // console.log(user)
-    // req.body.userCreds = {}
-
-    // try { // add locally stored profile picture to user
-    //     const userCreds = await userModel.findOne({ user_id: user.user_id })
-    //     user.imageBase64 = userCreds.imageBase64
-    //     req.body.userCreds = userCreds
-    // }
-    // catch { }
-    // req.body.user = user
     next()
 }
 
@@ -80,7 +59,7 @@ const login = async (req, res, next) => {
 }
 
 const returnUser = async (req, res) => {
-    res.status(202).send({ user_id: req.body.user.user_id })
+    res.status(202).send({ user_id: req.body.user.user_id, imageBase64: req.body.user.imageBase64 })
 }
 
 module.exports = { register, getUser, login, returnUser }

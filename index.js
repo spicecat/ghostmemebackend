@@ -5,7 +5,7 @@ app.use((req, res, next) => {
     res.removeHeader('X-Powered-By')
     next()
 })
-app.use(bodyParser.json({ limit: '500kb' }))
+app.use(bodyParser.json({ limit: '1.2mb' }))
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(cors())
 

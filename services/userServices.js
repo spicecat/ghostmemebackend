@@ -1,7 +1,7 @@
 const superagent = require('superagent'), bycrypt = require('bcrypt')
 const userModel = require('../models/User')
 
-const { apiUrl, apiKey } = require('./var')
+const { apiUrl, apiKey } = require('../var')
 
 const baseUrl = apiUrl + '/users'
 

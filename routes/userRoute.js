@@ -1,5 +1,5 @@
 const express = require('express')
-const { getAuth, returnToken } = require('../services/auth')
+const { getAuth, returnToken } = require('../middleware/auth')
 const { register, getUser, login, returnUser } = require('../services/userServices')
 
 const userRouter = express.Router()

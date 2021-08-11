@@ -62,4 +62,14 @@ const returnUser = async (req, res) => {
     res.status(202).send({ user_id: req.body.user.user_id, imageBase64: req.body.user.imageBase64 })
 }
 
-module.exports = { register, getUser, login, returnUser }
+const updatePassword = async (req, res, next) => {
+    const { password, email } = req.body
+    console.log(password)
+    const hashedPassword = await bycrypt.hash(password, 10)
+    console.log(hashedPassword)
+   await userModel.findOneAndUpdate({email},{password: hashedPassword})
+}
+
+
+
+module.exports = { register, getUser, login, returnUser, updatePassword }

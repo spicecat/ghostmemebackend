@@ -1,7 +1,7 @@
 const superagent = require('superagent'), bycrypt = require('bcrypt')
 const userModel = require('../models/User')
 
-const { apiUrl, apiKey } = require('./var')
+const { apiUrl, apiKey } = require('../var')
 
 const baseUrl = apiUrl + '/users'
 
@@ -62,4 +62,14 @@ const returnUser = async (req, res) => {
     res.status(202).send({ user_id: req.body.user.user_id })
 }
 
-module.exports = { register, getUser, login, returnUser }
+const updatePassword = async (req, res, next) => {
+    const { password, email } = req.body
+    console.log(password)
+    const hashedPassword = await bycrypt.hash(password, 10)
+    console.log(hashedPassword)
+   await userModel.findOneAndUpdate({email},{password: hashedPassword})
+}
+
+
+
+module.exports = { register, getUser, login, returnUser, updatePassword }

@@ -1,6 +1,6 @@
 const jsonWebToken = require('jsonwebtoken')
 
-const { tokenSignature } = require('./var')
+const { tokenSignature } = require('../var')
 
 
 const splitOnce = (s, d) => {
@@ -22,7 +22,7 @@ const getAuth = async (req, res, next) => {
             try {
                 const verification = verifyToken(authContent)
                 req.body.username = verification.username
-                console.log(verification)
+                console.log(verification, 'hello!')
                 next()
             } catch (err) { res.sendStatus(401) }
         }

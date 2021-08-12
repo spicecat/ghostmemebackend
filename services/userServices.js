@@ -94,6 +94,9 @@ const updateProfileInfo = async (req, res, next) => {
         // await superagent.put(url).set('key',apiKey).send(name,email,phone, imageUrl)
         var response = await superagent.put(url, nullifyUndefined({ name, email, phone, imageBase64 })).set('key', apiKey) 
         res.sendStatus(200)
+    }
+
+    
 const blockUser = async (req, res, next) => {
     const { target_id } = req.body
     const { blockedBy = [] } = await userModel.findOne({ user_id: target_id }) || {}

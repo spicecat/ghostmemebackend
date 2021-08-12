@@ -59,8 +59,8 @@ const login = async (req, res, next) => {
 }
 
 const returnUser = async (req, res) => {
-    const { user_id, notifications, blocked } = req.body.user
-    res.status(202).send({ user_id, notifications, blocked })
+    const { user_id, notifications, blocked, blockedBy } = req.body.user
+    res.status(202).send({ user_id, notifications, blocked, blockedBy })
 }
 
 const updatePassword = async (req, res, next) => {
@@ -70,15 +70,23 @@ const updatePassword = async (req, res, next) => {
     console.log(hashedPassword)
     await userModel.findOneAndUpdate({ email }, { password: hashedPassword })
 }
-
-const blockUser = async (req, res) => {
+const blockUser = async (req, res, next) => {
     const { target_id } = req.body
+    const { blockedBy = [] } = await userModel.findOne({ user_id: target_id }) || {}
+
     const { user_id, blocked } = req.body.user
     const deleteFromArray = (arr, e) => arr.splice(arr.indexOf(e), 1)
-    if (blocked.includes(target_id)) deleteFromArray(blocked, target_id)
-    else blocked.push(target_id)
+    if (blocked.includes(target_id)) {
+        deleteFromArray(blocked, target_id)
+        deleteFromArray(blockedBy, user_id)
+    }
+    else {
+        blocked.push(target_id)
+        blockedBy.push(user_id)
+    }
     await userModel.findOneAndUpdate({ user_id }, { blocked })
-    res.sendStatus(200)
+    await userModel.findOneAndUpdate({ user_id: target_id }, { blockedBy })
+    next()
 }
 
 module.exports = { register, getUser, login, returnUser, updatePassword, blockUser }

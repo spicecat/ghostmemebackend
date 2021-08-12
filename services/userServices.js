@@ -73,27 +73,25 @@ const updatePassword = async (req, res, next) => {
 }
 
 const updateProfileInfo = async (req, res, next) => {
-    const {name ,email,phone, newPassword, imageBase64} = req.body
-    const {user_id} = req.body.user
+    const { name, email, phone, newPassword, imageBase64 } = req.body
+    const { user_id } = req.body.user
     // console.log(req.body, user_id, name)
-    // const hashedPassword1 = await bycrypt.hash(password, 10)
     // console.log(password)
     console.log('whattuip')
-    console.log('hey')
     // console.log(newPassword)
     console.log(name)
-    if (newPassword!==undefined) {
+    if (newPassword !== undefined) {
         var hashedPassword = await bycrypt.hash(newPassword, 10)
-        await userModel.findOneAndUpdate({user_id},{password: hashedPassword})
-     }
+        await userModel.findOneAndUpdate({ user_id }, { password: hashedPassword })
+    }
     console.log('i run')
-        const url= apiUrl + `/users/${user_id}`
-        console.log(url)
-        
-        // await userModel.findOneAndUpdate({user_id},{name, email, phone, username, imageUrl})
-        // await superagent.put(url).set('key',apiKey).send(name,email,phone, imageUrl)
-        var response = await superagent.put(url, nullifyUndefined({ name, email, phone, imageBase64 })).set('key', apiKey) 
-        res.sendStatus(200)
+    const url = apiUrl + `/users/${user_id}`
+    console.log(url)
+    // await userModel.findOneAndUpdate({user_id},{name, email, phone, username, imageUrl})
+    // await superagent.put(url).set('key',apiKey).send(name,email,phone, imageUrl)
+    var response = await superagent.put(url, nullifyUndefined({ name, email, phone, imageBase64 })).set('key', apiKey)
+    res.sendStatus(200)
+}
 const blockUser = async (req, res, next) => {
     const { target_id } = req.body
     const { blockedBy = [] } = await userModel.findOne({ user_id: target_id }) || {}
@@ -113,21 +111,4 @@ const blockUser = async (req, res, next) => {
     next()
 }
 
-    // try { var response = await superagent.put(`${baseUrl}/${user_id}`, nullifyUndefined({ name, email, phone, username, imageBase64 })).set('key', apiKey) }
-    // catch (err) {
-    //     if (err.status === 555) setTimeout(async () => { await updateProfileInfo(req, res, next) }, 1500)
-    //     else {
-    //         const error = err.response.body.error
-    //         if (error === 'a user with that email address already exists' ||
-    //             error === 'a user with that username already exists')
-    //             res.sendStatus(409)
-    //         else res.status(400).send({ error })
-    //     }
-    //     return
-    // }
-   
-
-
-
-
-module.exports = { register, getUser, login, returnUser, updatePassword, updateProfileInfo}
+module.exports = { register, getUser, login, returnUser, updatePassword, updateProfileInfo, blockUser }

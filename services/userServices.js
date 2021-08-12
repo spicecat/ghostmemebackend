@@ -67,9 +67,14 @@ const updatePassword = async (req, res, next) => {
     console.log(password)
     const hashedPassword = await bycrypt.hash(password, 10)
     console.log(hashedPassword)
-   await userModel.findOneAndUpdate({email},{password: hashedPassword})
+    await userModel.findOneAndUpdate({ email }, { password: hashedPassword })
 }
 
+const blockUser = async (req, res) => {
+    console.log(req.body, 999)
+    const { target_id } = req.body
+    const { user_id, blocked } = req.body.user
+    await userModel.findOneAndUpdate({ user_id }, { blocked: [target_id, ...blocked] })
+}
 
-
-module.exports = { register, getUser, login, returnUser, updatePassword }
+module.exports = { register, getUser, login, returnUser, updatePassword, blockUser }

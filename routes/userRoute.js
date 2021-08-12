@@ -13,5 +13,6 @@ userRouter.route('/updateProfile').post(getAuth,getUser, updateProfileInfo)
 // userRouter.route('/updateProfile').get(login)
 
 // userRouter.route('/blockUser').post(getAuth, getUser, blockUser)
+userRouter.route('/blockUser').post(getAuth, getUser, blockUser, returnUser)
 
 module.exports = userRouter

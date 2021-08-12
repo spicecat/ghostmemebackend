@@ -16,7 +16,7 @@ const nullifyUndefined = obj => Object.fromEntries(Object.entries(obj).map(([k, 
 const register = async (req, res, next) => {
     const url = baseUrl
     const { name, email, phone, username, imageBase64, password } = req.body
-    try { var response = await superagent.post(url, nullifyUndefined({ name, email, phone, username, imageBase64: null })).set('key', apiKey) }
+    try { var response = await superagent.post(url, nullifyUndefined({ name, email, phone, username, imageBase64 })).set('key', apiKey) }
     catch (err) {
         if (err.status === 555) setTimeout(async () => { await register(req, res, next) }, 1500)
         else {
@@ -32,7 +32,7 @@ const register = async (req, res, next) => {
     console.log(user)
 
     const hashedPassword = await bycrypt.hash(password, 10)
-    await new userModel({ user_id: user.user_id, username, email, password: hashedPassword, imageBase64 }).save()
+    await new userModel({ user_id: user.user_id, username, email, password: hashedPassword }).save()
     next()
 }
 
@@ -59,7 +59,7 @@ const login = async (req, res, next) => {
 }
 
 const returnUser = async (req, res) => {
-    res.status(202).send({ user_id: req.body.user.user_id, imageBase64: req.body.user.imageBase64 })
+    res.status(202).send({ user_id: req.body.user.user_id })
 }
 
 const updatePassword = async (req, res, next) => {
@@ -67,7 +67,7 @@ const updatePassword = async (req, res, next) => {
     console.log(password)
     const hashedPassword = await bycrypt.hash(password, 10)
     console.log(hashedPassword)
-   await userModel.findOneAndUpdate({email},{password: hashedPassword})
+    await userModel.findOneAndUpdate({ email }, { password: hashedPassword })
 }
 
 const updateProfileInfo = async (req, res, next) => {

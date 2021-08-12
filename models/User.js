@@ -5,7 +5,7 @@ const UserSchema = mongoose.Schema({
     username: { type: String, required: true, unique: true },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
-    imageBase64: { type: String }
+    blocked: { type: Array, required: true, default: [] }
 })
 
 module.exports = mongoose.model('user', UserSchema)

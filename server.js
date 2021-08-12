@@ -7,7 +7,8 @@ mongoose.connect(mongoUrl, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     autoIndex: true,
-    useCreateIndex: true
+    useCreateIndex: true,
+    useFindAndModify: false
 }, err => {
     if (err) console.log('error:', err)
 })

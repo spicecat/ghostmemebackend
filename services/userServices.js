@@ -70,6 +70,31 @@ const updatePassword = async (req, res, next) => {
    await userModel.findOneAndUpdate({email},{password: hashedPassword})
 }
 
+const updateProfileInfo = async (req, res, next) => {
+    const {name ,email,phone, username, newPassword, password, imageUrl} = req.body
+    const {user_id} = req.body.user
+    // var hashedPassword = await bycrypt.hash(password, 10)
+    if (newPassword!==undefined) {
+        var hashedPassword = await bycrypt.hash(newPassword, 10) 
+        await userModel.findOneAndUpdate({user_id},{password: hashedPassword})
+    }
+    try { var response = await superagent.put(`${baseUrl}/${user_id}`, nullifyUndefined({ name, email, phone, username, imageBase64: null })).set('key', apiKey) }
+    
+    catch (err) {
+        if (err.status === 555) setTimeout(async () => { await updateProfileInfo(req, res, next) }, 1500)
+        else {
+            const error = err.response.body.error
+            if (error === 'a user with that email address already exists' ||
+                error === 'a user with that username already exists')
+                res.sendStatus(409)
+            else res.status(400).send({ error })
+        }
+        return
+    }
+    console.log('updated?', req.body)
+//    await userModel.findOneAndUpdate({user_id},{name, email, phone, username, imageUrl})
+}
 
 
-module.exports = { register, getUser, login, returnUser, updatePassword }
+
+module.exports = { register, getUser, login, returnUser, updatePassword, updateProfileInfo }

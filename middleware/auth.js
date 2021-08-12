@@ -12,7 +12,6 @@ const getAuth = async (req, res, next) => {
     try {
         // console.log(req.header('x-forwarded-for'), req.connection.remoteAddress, req.ip)
         const [authType, authContent] = splitOnce(req.headers.authorization, ' ')
-        console.log(req.body, authType, authContent)
         if (authType === 'Basic') {
             const [username, password] = splitOnce(Buffer.from(authContent, 'base64').toString('ASCII'), ':')
             req.body.username = username
@@ -22,7 +21,6 @@ const getAuth = async (req, res, next) => {
             try {
                 const verification = verifyToken(authContent)
                 req.body.username = verification.username
-                console.log(verification, 'hello!')
                 next()
             } catch (err) { res.sendStatus(401) }
         }

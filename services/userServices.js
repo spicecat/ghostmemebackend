@@ -1,5 +1,4 @@
 const superagent = require('superagent'), bycrypt = require('bcrypt')
-const { request } = require('..')
 const userModel = require('../models/User')
 
 const { apiUrl, apiKey } = require('../var')
@@ -7,12 +6,6 @@ const { apiUrl, apiKey } = require('../var')
 const baseUrl = apiUrl + '/users'
 
 const nullifyUndefined = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, v || null]))
-
-// const updateDatabase = async () => {
-//     const url = baseUrl
-//     const { users } = (await superagent.get(url).set('key', apiKey)).body
-//     console.log(users)
-// }
 
 const register = async (req, res, next) => {
     const url = baseUrl
@@ -75,16 +68,14 @@ const updatePassword = async (req, res, next) => {
 const updateProfileInfo = async (req, res, next) => {
     const { name, email, phone, newPassword, imageBase64 } = req.body
     const { user_id } = req.body.user
-    // console.log(req.body, user_id, name)
-    // console.log(password)
-    console.log('whattuip')
+
     // console.log(newPassword)
     console.log(name)
     if (newPassword !== undefined) {
         var hashedPassword = await bycrypt.hash(newPassword, 10)
         await userModel.findOneAndUpdate({ user_id }, { password: hashedPassword })
     }
-    console.log('i run')
+
     const url = apiUrl + `/users/${user_id}`
     console.log(url)
     // await userModel.findOneAndUpdate({user_id},{name, email, phone, username, imageUrl})

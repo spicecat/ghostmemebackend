@@ -15,7 +15,6 @@ const userRoute = require('./routes/userRoute')
 app.use('/users', userRoute)
 
 app.get('/env', (req, res) => { res.send(process.env.LOADED) })
-app.get('/', (req, res) => { res.send("home") })
 
 const mongoUrl = process.env.CONNECTION_STRING
 
@@ -23,9 +22,7 @@ mongoose.connect(mongoUrl, {
     useNewUrlParser: true,
     useUnifiedTopology: true,
     autoIndex: true,
-}, err => {
-    if (err) console.log('error:', err)
-})
+}, err => { if (err) console.log(err) })
 
 const dbConnection = mongoose.connection
 dbConnection.on('error', err => console.error(err))

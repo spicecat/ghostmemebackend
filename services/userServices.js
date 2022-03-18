@@ -1,4 +1,4 @@
-const superagent = require('superagent'), bcryptjs = require('bcryptjs')
+const superagent = require('superagent'), bcrypt = require('bcryptjs')
 const userModel = require('../models/User')
 
 const { apiUrl, apiKey } = require('../var')
@@ -7,13 +7,15 @@ const baseUrl = apiUrl + '/users'
 
 const nullifyUndefined = obj => Object.fromEntries(Object.entries(obj).map(([k, v]) => [k, v || null]))
 
+const hash = async password => bcrypt.hashSync(password, bcrypt.genSaltSync(10));
+
 const register = async (req, res, next) => {
     const url = baseUrl
     const { name, email, phone, username, imageBase64, password } = req.body
     try {
         const response = await superagent.post(url, nullifyUndefined({ name, email, phone, username, imageBase64 })).set('key', apiKey)
         const { user } = response.body
-        const hashedPassword = await bcryptjs.hash(password, 10)
+        const hashedPassword = await hash(password)
         await new userModel({ user_id: user.user_id, username, email, password: hashedPassword }).save()
     }
     catch (err) {
@@ -48,7 +50,7 @@ const getUser = async (req, res, next) => {
 
 const login = async (req, res, next) => {
     const { password, user } = req.body
-    if (user && await bcryptjs.compare(password, user.password)) next()
+    if (user && await bcrypt.compareSync(password, user.password)) next()
     else res.sendStatus(401)
 }
 
@@ -59,7 +61,7 @@ const returnUser = async (req, res) => {
 
 const updatePassword = async (req) => {
     const { password, email } = req.body
-    const hashedPassword = await bcryptjs.hash(password, 10)
+    const hashedPassword = await hash(password)
     await userModel.findOneAndUpdate({ email }, { password: hashedPassword })
 }
 
@@ -68,7 +70,7 @@ const updateProfileInfo = async (req, res) => {
     const { user_id } = req.body.user
 
     if (newPassword !== undefined) {
-        const hashedPassword = await bcryptjs.hash(newPassword, 10)
+        const hashedPassword = await hash(password)
         await userModel.findOneAndUpdate({ user_id }, { password: hashedPassword })
     }
 

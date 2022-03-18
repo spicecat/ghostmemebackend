@@ -1,4 +1,4 @@
-const jsonWebToken = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 
 const { tokenSignature } = require('../var')
 
@@ -10,7 +10,6 @@ const splitOnce = (s, d) => {
 
 const getAuth = async (req, res, next) => {
     try {
-        // console.log(req.header('x-forwarded-for'), req.connection.remoteAddress, req.ip)
         const [authType, authContent] = splitOnce(req.headers.authorization, ' ')
         if (authType === 'Basic') {
             const [username, password] = splitOnce(Buffer.from(authContent, 'base64').toString('ASCII'), ':')
@@ -29,10 +28,9 @@ const getAuth = async (req, res, next) => {
 }
 
 const returnToken = async (req, res) => {
-    console.log(req.query)
-    res.status(202).send({ token: jsonWebToken.sign({ username: req.body.username }, tokenSignature, req.query.rememberMe && { expiresIn: '2h' }) })
+    res.status(202).send({ token: jwt.sign({ username: req.body.username }, tokenSignature, req.query && req.query.rememberMe && { expiresIn: '2h' }) })
 }
 
-const verifyToken = token => jsonWebToken.verify(token, tokenSignature)
+const verifyToken = token => jwt.verify(token, tokenSignature)
 
 module.exports = { getAuth, returnToken, verifyToken }
